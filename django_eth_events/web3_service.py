@@ -8,7 +8,7 @@ from django.core.exceptions import ImproperlyConfigured
 from eth_tester import EthereumTester
 from requests.exceptions import ConnectionError
 from web3 import HTTPProvider, IPCProvider, Web3
-from web3.exceptions import UnhandledRequest
+from web3.exceptions import CannotHandleRequest
 from web3.middleware import geth_poa_middleware
 from web3.providers.eth_tester import EthereumTesterProvider
 
@@ -32,7 +32,7 @@ class Web3ServiceProvider:
 
 
 class Web3Service:
-    connection_exceptions: Tuple[Exception] = (UnhandledRequest, socket.timeout, ConnectionError)
+    connection_exceptions: Tuple[Exception] = (CannotHandleRequest, socket.timeout, ConnectionError)
 
     @staticmethod
     def get_provider_from_uri(node_uri: str):
@@ -70,7 +70,7 @@ class Web3Service:
             if int(self.web3.net.version) == RINKEBY_CHAIN_ID:
                 self.web3.middleware_stack.inject(geth_poa_middleware, layer=0)
         # For tests using dummy connections (like IPC)
-        except (UnhandledRequest, ConnectionError, ConnectionRefusedError, FileNotFoundError):
+        except (CannotHandleRequest, ConnectionError, ConnectionRefusedError, FileNotFoundError):
             pass
 
     @property
@@ -85,7 +85,7 @@ class Web3Service:
 
     @property
     def main_provider(self):
-        return self.web3.providers[0]
+        return self.web3.provider
 
     def get_node_uri(self) -> str:
         if isinstance(self.provider, HTTPProvider):
