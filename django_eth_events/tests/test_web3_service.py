@@ -16,7 +16,7 @@ class TestSingleton(TestCase):
         self.web3_service = Web3Service(provider=EthereumTesterProvider(EthereumTester()))
         self.web3 = self.web3_service.web3
         self.web3.eth.defaultAccount = self.web3.eth.coinbase
-        self.provider = self.web3.providers[0]
+        self.provider = self.web3.provider
         self.tx_data = {'from': self.web3.eth.coinbase,
                         'gas': 1000000}
         self.event_receivers = []
@@ -43,18 +43,18 @@ class TestSingleton(TestCase):
     def test_provider_http(self):
         with self.settings(ETHEREUM_NODE_URL='http://localhost:8545'):
             web3_service = Web3ServiceProvider()
-            provider = web3_service.web3.providers[0]
+            provider = web3_service.web3.provider
             self.assertTrue(isinstance(provider, HTTPProvider))
 
         with self.settings(ETHEREUM_NODE_URL='https://localhost:8545'):
             web3_service = Web3ServiceProvider()
-            provider = web3_service.web3.providers[0]
+            provider = web3_service.web3.provider
             self.assertTrue(isinstance(provider, HTTPProvider))
 
     def test_provider_ipc(self):
         socket_path = str(Path('/tmp/socket.ipc').expanduser().resolve())
         with self.settings(ETHEREUM_NODE_URL='ipc://' + socket_path):
             web3_service = Web3ServiceProvider()
-            provider = web3_service.web3.providers[0]
+            provider = web3_service.web3.provider
             self.assertTrue(isinstance(provider, IPCProvider))
             self.assertEqual(provider.ipc_path, socket_path)

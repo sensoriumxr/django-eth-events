@@ -27,7 +27,7 @@ requirements = [
     "ethereum>=2",
     "kombu>=4.1.0",
     "requests>=2.0.0",
-    "web3>=4",
+    "web3>=5",
 ]
 
 setup(

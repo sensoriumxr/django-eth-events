@@ -26,7 +26,7 @@ class TestCelery(TestCase):
 
     def setUp(self):
         self.web3 = Web3Service(provider=EthereumTesterProvider(EthereumTester())).web3
-        self.provider = self.web3.providers[0]
+        self.provider = self.web3.provider
         self.web3.eth.defaultAccount = self.web3.eth.coinbase
         self.tx_data = {'from': self.web3.eth.coinbase,
                         'gas': 1000000}

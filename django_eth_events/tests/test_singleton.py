@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.test import TestCase
 from eth_tester import EthereumTester
-from web3 import HTTPProvider, IPCProvider
-from web3.providers.eth_tester import EthereumTesterProvider
+from web3 import HTTPProvider, IPCProvider, EthereumTesterProvider
 
 from ..event_listener import EventListener
 from ..web3_service import Web3Service, Web3ServiceProvider
@@ -22,19 +21,19 @@ class TestSingleton(TestCase):
         )
 
         service1 = Web3ServiceProvider()
-        self.assertIsInstance(service1.web3.providers[0], HTTPProvider)
+        self.assertIsInstance(service1.web3.provider, HTTPProvider)
         service2 = Web3Service(ipc_provider)
-        self.assertIsInstance(service2.web3.providers[0], IPCProvider)
-        self.assertEqual(service2.web3.providers[0], ipc_provider)
+        self.assertIsInstance(service2.web3.provider, IPCProvider)
+        self.assertEqual(service2.web3.provider, ipc_provider)
 
     def test_eth_tester_provider(self):
         eth_tester_provider = EthereumTesterProvider(EthereumTester())
 
         service1 = Web3ServiceProvider()
-        self.assertIsInstance(service1.web3.providers[0], HTTPProvider)
+        self.assertIsInstance(service1.web3.provider, HTTPProvider)
         service2 = Web3Service(eth_tester_provider)
-        self.assertIsInstance(service2.web3.providers[0], EthereumTesterProvider)
-        self.assertEqual(service2.web3.providers[0], eth_tester_provider)
+        self.assertIsInstance(service2.web3.provider, EthereumTesterProvider)
+        self.assertEqual(service2.web3.provider, eth_tester_provider)
 
     def test_event_listener_singleton(self):
         ipc_provider = IPCProvider(
