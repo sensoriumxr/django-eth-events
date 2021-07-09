@@ -6,7 +6,7 @@ from django.conf import settings
 from django.db import transaction
 from django.utils.module_loading import import_string
 
-from etherium.utils import checksum_encode
+from ethereum.utils import checksum_encode
 from .decoder import Decoder
 from .exceptions import InvalidAddressException
 from .models import Block, Daemon
