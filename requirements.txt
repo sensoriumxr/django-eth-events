@@ -10,3 +10,13 @@ requests==2.20.0
 urllib3==1.24.2
 web3[tester] == 5.5.1
 eth-abi>=2.0.0b6,<3.0.0
+coincurve>=7.0.0
+future
+pbkdf2
+py_ecc
+pyethash>=0.1.27,<1.0.0
+pycryptodome>=3.4.7
+pysha3>=1.0.1
+PyYAML
+repoze.lru
+scrypt
