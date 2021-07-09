@@ -5,7 +5,8 @@ from celery.utils.log import get_task_logger
 from django.conf import settings
 from django.db import transaction
 from django.utils.module_loading import import_string
-from ethereum.utils import checksum_encode
+from eth_utils import big_endian_to_int, encode_hex
+from web3._utils.normalizers import normalize_address
 
 from .decoder import Decoder
 from .exceptions import InvalidAddressException
@@ -17,11 +18,50 @@ from .web3_service import Web3Service, Web3ServiceProvider
 
 logger = get_task_logger(__name__)
 
+try:
+    from Crypto.Hash import keccak
+
+
+    def sha3_256(x):
+        return keccak.new(digest_bits=256, data=x).digest()
+except ImportError:
+    import sha3 as _sha3
+
+
+    def sha3_256(x):
+        return _sha3.keccak_256(x).digest()
+
+
+def to_string(value):
+    if isinstance(value, bytes):
+        return value
+    if isinstance(value, str):
+        return bytes(value, 'utf-8')
+    if isinstance(value, int):
+        return bytes(str(value), 'utf-8')
+
+
+def sha3(seed):
+    return sha3_256(to_string(seed))
+
+
+def checksum_encode(addr):  # Takes a 20-byte binary address as input
+    addr = normalize_address(addr)
+    o = ''
+    v = big_endian_to_int(sha3(encode_hex(addr)))
+    for i, c in enumerate(encode_hex(addr)):
+        if c in '0123456789':
+            o += c
+        else:
+            o += c.upper() if (v & (2 ** (255 - 4 * i))) else c.lower()
+    return '0x' + o
+
 
 class SingletonListener:
     """
     Singleton class decorator for EventListener
     """
+
     def __init__(self, klass):
         self.klass = klass
         self.instance = None
@@ -124,8 +164,10 @@ class EventListener:
                     contract_parsed['ADDRESSES'] = list(set(contract_parsed['ADDRESSES']))
 
             if 'ADDRESSES_GETTER' in contract:
-                contract_parsed['ADDRESSES_GETTER_CLASS'] = self.import_class_from_string(contract['ADDRESSES_GETTER'])()
-            contract_parsed['EVENT_DATA_RECEIVER_CLASS'] = self.import_class_from_string(contract['EVENT_DATA_RECEIVER'])()
+                contract_parsed['ADDRESSES_GETTER_CLASS'] = self.import_class_from_string(
+                    contract['ADDRESSES_GETTER'])()
+            contract_parsed['EVENT_DATA_RECEIVER_CLASS'] = self.import_class_from_string(
+                contract['EVENT_DATA_RECEIVER'])()
             contracts_parsed.append(contract_parsed)
         return contracts_parsed
 
